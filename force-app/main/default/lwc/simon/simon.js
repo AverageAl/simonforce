@@ -5,16 +5,50 @@ import bluesound from '@salesforce/resourceUrl/bluesound';
 import yellowsound from '@salesforce/resourceUrl/yellowsound';
 
 export default class simon extends LightningElement {
-    audio = [
-        new Audio(redsound),
-        new Audio(bluesound),
-        new Audio(greensound),
-        new Audio(yellowsound)
+    sequence=[0,1,2,3,1,2,1,0];
+    audioSrc = [
+        redsound,
+        bluesound,
+        greensound,
+        yellowsound
     ]
+    audio = new Audio();
 
+    next = false;
+    currentIndex = 0;
+    userSelection;
+    score = 0;
+    
+    connectedCallback(){
+        this.sequence.push(Math.floor(Math.random() * 4));
+        this.audio.addEventListener('ended', (event) => {
+            if (this.next && this.currentIndex < this.sequence.length){
+                this.audio.src = this.audioSrc[this.sequence[this.currentIndex]];
+                this.audio.play();
+                this.currentIndex++;
+            }
+            if (this.currentIndex >= this.sequence.length){
+                this.currentIndex = 0;
+                this.next = false;
+            }
+        });
+    
+    }
     clickHandler(event){
-        console.log(event.target.dataset.id); // gets the id of the button clicked which should be the index of the audio file in the audio list
-        this.audio[parseInt(event.target.dataset.id) ].play();
+        console.log('playing sequence');
+        this.playSequence();
+        //console.log(event.target.dataset.id);
+        //this.audio.src = this.audioSrc[parseInt(event.target.dataset.id) ];
+        //this.audio.play();
+    }
+
+    playSequence(){
+        console.log('setting next');
+        this.next = true;
+        console.log('setting source');
+        this.audio.src = this.audioSrc[this.sequence[this.currentIndex]];
+        console.log('playing audio');
+        this.audio.play();
     }
     
     // // enum GAMETYPE {
