@@ -6,6 +6,7 @@ import yellowsound from '@salesforce/resourceUrl/yellowsound';
 
 export default class simon extends LightningElement {
     sequence=[0,1,2,3,1,2,1,0];
+    // list of source audio files
     audioSrc = [
         redsound,
         bluesound,
@@ -21,6 +22,9 @@ export default class simon extends LightningElement {
     
     connectedCallback(){
         this.sequence.push(Math.floor(Math.random() * 4));
+
+        //adds an event listener to when the audio stops playing, if this.next is true it loads the next song
+        //if the end of the sequence is reached it sets next to false and resets the current index
         this.audio.addEventListener('ended', (event) => {
             if (this.next && this.currentIndex < this.sequence.length){
                 this.audio.src = this.audioSrc[this.sequence[this.currentIndex]];
@@ -42,6 +46,7 @@ export default class simon extends LightningElement {
         //this.audio.play();
     }
 
+    //sets next to true, sets the first audio source and then plays it
     playSequence(){
         console.log('setting next');
         this.next = true;
