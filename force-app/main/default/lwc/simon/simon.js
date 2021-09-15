@@ -1,6 +1,22 @@
 import { LightningElement } from 'lwc';
+import greensound from '@salesforce/resourceUrl/greensound';
+import redsound from '@salesforce/resourceUrl/redsound';
+import bluesound from '@salesforce/resourceUrl/bluesound';
+import yellowsound from '@salesforce/resourceUrl/yellowsound';
 
 export default class simon extends LightningElement {
+    audio = [
+        new Audio(redsound),
+        new Audio(bluesound),
+        new Audio(greensound),
+        new Audio(yellowsound)
+    ]
+
+    clickHandler(event){
+        console.log(event.target.dataset.id); // gets the id of the button clicked which should be the index of the audio file in the audio list
+        this.audio[parseInt(event.target.dataset.id) ].play();
+    }
+    
     // // enum GAMETYPE {
     // //     CUSTOM,
     // //     STANDARD,
