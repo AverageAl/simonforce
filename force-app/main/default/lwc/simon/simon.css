@@ -9,15 +9,23 @@
 h1{
     font-size: xx-large;
     color: white;
+    padding-bottom: 2vh;
+    text-align: center;
 }
-.sideBar{
-    width: 25vw;      
+.sideBarContainer{
+    width: 25vw;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
 }
-
+/* visibility is hidden until create is clicked */
+.toggle{ 
+    padding-top: 2vh;
+    /* visibility: hidden; */
+}
 .sideButtons{
-    display: flex;
-    width: 100%;
     background-color: #C4C4C4;
+    padding: 1vh;
 }
 .buttonContainer{
     padding-top: 2vh;
