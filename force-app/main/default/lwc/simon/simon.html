@@ -1,6 +1,20 @@
-<template>
-    <lightning-button data-id="0" onclick></lightning-button>
-    <lightning-button data-id="1" onclick></lightning-button>
-    <lightning-button data-id="2" onclick></lightning-button>
-    <lightning-button data-id="3" onclick></lightning-button>
+<template> <!--All buttons will need onclick assigned, but -->
+    <div class="background">
+        <div class="container">
+            
+                <div class="sideBar">
+                    <h1>Simon</h1>
+                    <button class="sideButtons">Solo</button>
+                    <button class="sideButtons">Create</button>
+                    <button class="sideButtons">Start Game</button>
+                </div>
+            
+            <div class="buttonContainer">
+                <button data-id="0" class="zero"></button>
+                <button data-id="1" class="one"></button>
+                <button data-id="2" class="two"></button>
+                <button data-id="3" class="three"></button>
+            </div>
+        </div>
+    </div>
 </template>

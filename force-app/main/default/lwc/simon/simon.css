@@ -1,0 +1,49 @@
+.background{
+    height: 100vh;
+    width: 100vw;
+    background:black; 
+}
+.container{
+    display: flex;
+}
+h1{
+    font-size: xx-large;
+    color: white;
+}
+.sideBar{
+    width: 25vw;      
+}
+
+.sideButtons{
+    display: flex;
+    width: 100%;
+    
+    background-color: #C4C4C4;
+}
+.buttonContainer{
+    padding-top: 2vh;
+    width: 50vw;
+    height: 50vw;
+    display: flex;
+    flex-wrap: wrap;
+}
+.zero{
+    background-color: #21E935;
+    height: 50%;
+    width: 50%;
+}
+.one{
+    background-color: #EA2D2D;
+    height: 50%;
+    width: 50%;
+}
+.two{
+    background-color: #E9FA2A;
+    height: 50%;
+    width: 50%;
+}
+.three{
+    background-color: #0065FC;
+    height: 50%;
+    width: 50%;
+}
