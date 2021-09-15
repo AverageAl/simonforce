@@ -1,17 +1,18 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, api } from 'lwc';
 
 export default class simon extends LightningElement {
-    enum GAMETYPE {
-        CUSTOM,
-        STANDARD,
-    }
+    // enum GAMETYPE {
+    //     CUSTOM,
+    //     STANDARD,
+    // }
+    @api gameType = false; //false=default true=custom
     userSequence;
     sequence = [];
     currentIndex;
     userSelection;
     score;
     gameStarted = false;
-    gameType = GAMETYPE.STANDARD;
+   // gameType = GAMETYPE.STANDARD;
     connectedCallback(){
         this.sequence.push(Math.floor(Math.random() * 4));
     }
@@ -19,23 +20,23 @@ export default class simon extends LightningElement {
     handleUserSequence(event){
         this.userSequence = event.detail.value;
         this.userSequence = this.userSequence.split('').map(c => Number(c));
-        this.gameType = GAMETYPE.CUSTOM;
+        this.gameType = true;//GAMETYPE.CUSTOM;
     }
     //Initialize Game
     startGame(){
         // ASK USER IF THEY WANT TO RESTART IF THEY ARE CURRENTLY IN GAME
-        this.gameStarted = true;
-        this.sequence = [];
-        score = 0;
-        this.currentIndex = 0;
-        getNext();
+         this.gameStarted = true;
+         this.sequence = [];
+         this.score = 0;
+         this.currentIndex = 0;
+         //getNext();
     }
     //End game
     endGame(){
         this.gameStarted = false;
     }
     getNext(){
-        if(this.gameType = GAMETYPE.CUSTOM){
+        if(this.gameType){
             this.sequence.push(this.userSequence[this.currentIndex]);
         }
         else{
@@ -56,7 +57,7 @@ export default class simon extends LightningElement {
                 endGame();
                 return;
             }
-            if ((this.gameType == GAMETYPE.CUSTOM) && (this.currentIndex == this.userSequence.length)){
+            if ((this.gameType) && (this.currentIndex == this.userSequence.length)){
                 endGame();
             }
             //Finished sequence. Add next pattern to sequence.
