@@ -21,7 +21,7 @@ h1{
 /* visibility is hidden until create is clicked */
 .toggle{ 
     padding-top: 2vh;
-    /* visibility: hidden; */
+    visibility: hidden; 
 }
 .sideButtons{
     background-color: #C4C4C4;
