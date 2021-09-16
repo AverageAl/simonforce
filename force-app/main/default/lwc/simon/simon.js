@@ -5,14 +5,16 @@ import bluesound from '@salesforce/resourceUrl/bluesound';
 import yellowsound from '@salesforce/resourceUrl/yellowsound';
 
 export default class simon extends LightningElement {
-    audio = [
-        new Audio(redsound),
-        new Audio(bluesound),
-        new Audio(greensound),
-        new Audio(yellowsound)
+   // sequence=[0,1,2,3,1,2,1,0];
+    // list of source audio files
+    audioSrc = [
+        redsound,
+        bluesound,
+        greensound,
+        yellowsound
     ]
     curSquare;
-    gameType = false; //false=default true=custom
+    gameType; //false=default true=custom
     userSequence;
     sequence = [];
     currentIndex;
@@ -22,36 +24,57 @@ export default class simon extends LightningElement {
     @api gameButton = "Start Game";
     run; 
    // gameType = GAMETYPE.STANDARD;
-    // connectedCallback(){
-    //     this.sequence.push(Math.floor(Math.random() * 4));
-    // }
+    audio = new Audio();
+
+    next = false;
+    currentIndex = 0;
+    userSelection;
+    score = 0;
+    
+    connectedCallback(){
+        this.sequence.push(Math.floor(Math.random() * 4));
+
+        //adds an event listener to when the audio stops playing, if this.next is true it loads the next song
+        //if the end of the sequence is reached it sets next to false and resets the current index
+        this.audio.addEventListener('ended', (event) => {
+            if (this.next && this.currentIndex < this.sequence.length){
+                this.audio.src = this.audioSrc[this.sequence[this.currentIndex]];
+                this.audio.play();
+                this.currentIndex++;
+            }
+            if (this.currentIndex >= this.sequence.length){
+                this.currentIndex = 0;
+                this.next = false;
+            }
+        });
+    
+    }
+
+    //sets next to true, sets the first audio source and then plays it
+    playSequence(){
+        console.log('setting next');
+        this.next = true;
+        console.log('setting source');
+        // this.audio.src = this.audioSrc[this.sequence[this.currentIndex]];
+        // console.log('playing audio');
+        // this.audio.play();
+        this.audioPlay(this.sequence[this.currentIndex]); 
+    }
+
     // Take in user entered sequence and parse into list
     handleUserSequence(event){
         this.userSequence = event.detail.value;
         this.userSequence = this.userSequence.split('').map(c => Number(c));
-        this.gameType = true;//GAMETYPE.CUSTOM;
+        this.gameType = 'CUSTOM';//true;//GAMETYPE.CUSTOM;
     }
     //Initialize Game
     startGame(){
         // ASK USER IF THEY WANT TO RESTART IF THEY ARE CURRENTLY IN GAME
-         this.gameStarted = true;
-         this.sequence = [];
-         //this.score = 0;
-         this.currentIndex = 0;
-         this.gameButton = "End Game";
-        //  while (this.gameStarted){
-       // for(int=0; i<10000; i++){
-            
-                this.getNext();
-            
-            //this.revertColor(); 
-            //if(this.gameStarted = false){
-            //    this.endGame(); 
-           // }
-       // }
-            
-        // }
-         
+        this.gameStarted = true;
+        this.sequence = [];
+        this.currentIndex = 0;
+        this.gameButton = "End Game"; 
+        this.getNext();    
     }
     //End game
     endGame(){
@@ -59,29 +82,22 @@ export default class simon extends LightningElement {
         this.gameButton = "Start Game";
     }
     getNext(){
-        // if(this.gameType){
-        //     this.sequence.push(this.userSequence[this.currentIndex]);
-        // }
-        // else{
-        //     this.sequence.push(Math.floor(Math.random() * 4));
-        // }
-        // this.currentIndex = 0;
-        // do{
-            // setTimeout(function(){
-        
+        if(this.gameType == 'CUSTOM'){
+            this.sequence.push(this.userSequence[this.currentIndex]);
+        }else{
+            this.sequence.push(Math.floor(Math.random() * 4));
+        }
+        this.currentIndex = 0; 
+
         this.run = setTimeout(() => {  
                 if(this.gameStarted){
                 this.curSquare = Math.floor(Math.random() * 4);
-                let query = '[data-id='+ '"'+this.curSquare+'"'+']';
-                this.template.querySelector(query).style="background-color:black";
+                this.audioPlay(this.curSquare);              
                 }
-                setTimeout(() => { this.revertColor();}, 500);
+                
             }, 2000);
-        
-    
     }
     revertColor(){
-        //this.curSquare;
         let query = '[data-id='+ '"'+this.curSquare+'"'+']';
         let color="background-color:";
         switch(this.curSquare){
@@ -114,23 +130,27 @@ export default class simon extends LightningElement {
     //         }
     //     }
     // }
+    audioPlay(id){
+        let query = '[data-id='+ '"'+this.curSquare+'"'+']';
+                this.template.querySelector(query).style="background-color:black";
+        let song = this.audioSrc[id];
+        this.audio.src = song; 
+        this.audio.play();
+        setTimeout(() => { this.revertColor();}, 500);
+    }
     //audio handler
     clickHandler(event){
-        console.log(event.target.dataset.id); // gets the id of the button clicked which should be the index of the audio file in the audio list
-        this.audio[parseInt(event.target.dataset.id) ].play();
+
+        this.audioPlay(parseInt(event.target.dataset.id));
         let run2 = setTimeout(() => {this.getNext()}, 1000);
+        
         if(event.target.dataset.id != this.curSquare){
             clearTimeout(this.run);
             clearTimeout(run2);
-            this.endGame(); 
-            
+            this.endGame();      
         }else{
             this.score++; 
-             
-            //this.revertColor();
-            //this.getNext();
-        }
-        
+        }  
     }
     toggleCreate(){
         this.template.querySelector('[data-id="toggle"]').style="visibility:visible";
