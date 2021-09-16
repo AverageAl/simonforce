@@ -5,7 +5,7 @@ import bluesound from '@salesforce/resourceUrl/bluesound';
 import yellowsound from '@salesforce/resourceUrl/yellowsound';
 
 export default class simon extends LightningElement {
-   // sequence=[0,1,2,3,1,2,1,0];
+
     // list of source audio files
     audioSrc = [
         redsound,
@@ -13,6 +13,7 @@ export default class simon extends LightningElement {
         greensound,
         yellowsound
     ]
+
     curSquare;
     gameType; //false=default true=custom
     userSequence;
@@ -23,13 +24,13 @@ export default class simon extends LightningElement {
     gameStarted = false;
     @api gameButton = "Start Game";
     run; 
-   // gameType = GAMETYPE.STANDARD;
     audio = new Audio();
 
     next = false;
     currentIndex = 0;
     userSelection;
     score = 0;
+    userInput=[]; 
     
     connectedCallback(){
         this.sequence.push(Math.floor(Math.random() * 4));
@@ -47,7 +48,6 @@ export default class simon extends LightningElement {
                 this.next = false;
             }
         });
-    
     }
 
     //sets next to true, sets the first audio source and then plays it
@@ -67,6 +67,7 @@ export default class simon extends LightningElement {
         this.userSequence = this.userSequence.split('').map(c => Number(c));
         this.gameType = 'CUSTOM';//true;//GAMETYPE.CUSTOM;
     }
+
     //Initialize Game
     startGame(){
         // ASK USER IF THEY WANT TO RESTART IF THEY ARE CURRENTLY IN GAME
@@ -76,31 +77,33 @@ export default class simon extends LightningElement {
         this.gameButton = "End Game"; 
         this.getNext();    
     }
+
     //End game
     endGame(){
+        alert("You messed up! Your score is: " + this.score);
         this.gameStarted = false;
         this.gameButton = "Start Game";
+        this.sequence = [];
+        this.userInput=[]; 
+        this.score = 0; 
     }
-    getNext(){
-        if(this.gameType == 'CUSTOM'){
-            this.sequence.push(this.userSequence[this.currentIndex]);
-        }else{
-            this.sequence.push(Math.floor(Math.random() * 4));
-        }
-        this.currentIndex = 0; 
 
-        this.run = setTimeout(() => {  
-                if(this.gameStarted){
-                this.curSquare = Math.floor(Math.random() * 4);
-                this.audioPlay(this.curSquare);              
-                }
-                
-            }, 2000);
+    //gets next in sequence and plays
+    async getNext(){
+        this.curSquare = Math.floor(Math.random() * 4); 
+        this.sequence.push(this.curSquare);
+
+        for (let i = 0; i < this.sequence.length; i++){
+            await this.wait(1000);
+            this.audioPlay(this.sequence[i]);  
+        }
     }
-    revertColor(){
-        let query = '[data-id='+ '"'+this.curSquare+'"'+']';
+
+    //reverts to original colors
+    revertColor(id){
+        let query = '[data-id='+ '"'+id+'"'+']';
         let color="background-color:";
-        switch(this.curSquare){
+        switch(id){
             case 0: color+"#21E935";
             case 1: color+"#EA2D2D";
             case 2: color+"#E9FA2A";
@@ -108,50 +111,35 @@ export default class simon extends LightningElement {
         }
         this.template.querySelector(query).style=color;
     }
-    // checkUserSelection(){
-    //     //Do nothing if the game is not started
-    //     if (this.gameStarted) {
-    //         //Correct answer
-    //         if (this.userSelection == this.sequence[currentIndex]){
-    //             this.currentIndex += 1;
-    //         }
-    //         //Incorrect answer. Showing final score and restarting game.
-    //         else {
-    //             //SHOW ALERT OF FINAL SCORE
-    //             endGame();
-    //             return;
-    //         }
-    //         if ((this.gameType) && (this.currentIndex == this.userSequence.length)){
-    //             endGame();
-    //         }
-    //         //Finished sequence. Add next pattern to sequence.
-    //         if (this.currentIndex == this.sequence.length){
-    //             getNext();
-    //         }
-    //     }
-    // }
+
+    //waits for colors to show
+    wait(ms)  {
+        return new Promise( resolve => { setTimeout(resolve, ms); });
+    }
+
     audioPlay(id){
-        let query = '[data-id='+ '"'+this.curSquare+'"'+']';
-                this.template.querySelector(query).style="background-color:black";
+        let query = '[data-id='+ '"'+id+'"'+']';
+        this.template.querySelector(query).style="background-color:black";
         let song = this.audioSrc[id];
         this.audio.src = song; 
         this.audio.play();
-        setTimeout(() => { this.revertColor();}, 500);
+        setTimeout(() => { this.revertColor(id);}, 100);
     }
     //audio handler
     clickHandler(event){
+        this.userInput.push(parseInt(event.target.dataset.id));
+        this.audioPlay(event.target.dataset.id);
 
-        this.audioPlay(parseInt(event.target.dataset.id));
-        let run2 = setTimeout(() => {this.getNext()}, 1000);
-        
-        if(event.target.dataset.id != this.curSquare){
-            clearTimeout(this.run);
-            clearTimeout(run2);
-            this.endGame();      
-        }else{
+        if(JSON.stringify(this.userInput) === JSON.stringify(this.sequence)){
+            this.userInput=[];
             this.score++; 
-        }  
+            this.getNext();
+        }else if(JSON.stringify(this.userInput) != JSON.stringify(this.sequence) && this.userInput.length >= this.sequence.length){
+            this.endGame(); 
+        }
     }
+
+    //flips the visibility of user input 
     toggleCreate(){
         this.template.querySelector('[data-id="toggle"]').style="visibility:visible";
     }
