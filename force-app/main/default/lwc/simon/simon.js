@@ -8,10 +8,10 @@ export default class simon extends LightningElement {
 
     // list of source audio files
     audioSrc = [
-        redsound,
-        bluesound,
         greensound,
-        yellowsound
+        redsound,
+        yellowsound,
+        bluesound
     ]
 
     curSquare;
@@ -28,6 +28,7 @@ export default class simon extends LightningElement {
 
     next = false;
     currentIndex = 0;
+    sequenceIndex = 0;
     userSelection;
     score = 0;
     userInput=[]; 
@@ -38,13 +39,24 @@ export default class simon extends LightningElement {
         //adds an event listener to when the audio stops playing, if this.next is true it loads the next song
         //if the end of the sequence is reached it sets next to false and resets the current index
         this.audio.addEventListener('ended', (event) => {
-            if (this.next && this.currentIndex < this.sequence.length){
-                this.audio.src = this.audioSrc[this.sequence[this.currentIndex]];
-                this.audio.play();
-                this.currentIndex++;
+
+            this.indexOfAudio = 0;
+            for(let x = 0; x < 4; x++){
+                if (this.audio.src.includes(this.audioSrc[x])){
+                    this.indexOfAudio = x;
+                }
             }
-            if (this.currentIndex >= this.sequence.length){
-                this.currentIndex = 0;
+
+
+            this.revertColor( this.indexOfAudio );
+
+            this.sequenceIndex++;
+            if (this.next && this.sequenceIndex < this.sequence.length){
+                this.audio.src = this.audioSrc[this.sequence[this.sequenceIndex]];
+                this.audio.play();
+            }
+            if (this.sequenceIndex >= this.sequence.length){
+                this.sequenceIndex = 0;
                 this.next = false;
             }
         });
@@ -54,11 +66,9 @@ export default class simon extends LightningElement {
     playSequence(){
         console.log('setting next');
         this.next = true;
+        this.sequenceIndex = 0;
         console.log('setting source');
-        // this.audio.src = this.audioSrc[this.sequence[this.currentIndex]];
-        // console.log('playing audio');
-        // this.audio.play();
-        this.audioPlay(this.sequence[this.currentIndex]); 
+        this.audioPlay(this.sequence[this.sequenceIndex]); 
     }
 
     // Take in user entered sequence and parse into list
@@ -121,6 +131,7 @@ export default class simon extends LightningElement {
         let query = '[data-id='+ '"'+id+'"'+']';
         this.template.querySelector(query).style="background-color:black";
         let song = this.audioSrc[id];
+
         this.audio.src = song; 
         this.audio.play();
         setTimeout(() => { this.revertColor(id);}, 100);
