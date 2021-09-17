@@ -32,44 +32,45 @@ export default class simon extends LightningElement {
     userSelection;
     score = 0;
     userInput=[]; 
+    noClick = false; 
     
-    connectedCallback(){
-        this.sequence.push(Math.floor(Math.random() * 4));
+    // connectedCallback(){
+    //     this.sequence.push(Math.floor(Math.random() * 4));
 
-        //adds an event listener to when the audio stops playing, if this.next is true it loads the next song
-        //if the end of the sequence is reached it sets next to false and resets the current index
-        this.audio.addEventListener('ended', (event) => {
+    //     //adds an event listener to when the audio stops playing, if this.next is true it loads the next song
+    //     //if the end of the sequence is reached it sets next to false and resets the current index
+    //     this.audio.addEventListener('ended', (event) => {
 
-            this.indexOfAudio = 0;
-            for(let x = 0; x < 4; x++){
-                if (this.audio.src.includes(this.audioSrc[x])){
-                    this.indexOfAudio = x;
-                }
-            }
+    //         this.indexOfAudio = 0;
+    //         for(let x = 0; x < 4; x++){
+    //             if (this.audio.src.includes(this.audioSrc[x])){
+    //                 this.indexOfAudio = x;
+    //             }
+    //         }
 
 
-            this.revertColor( this.indexOfAudio );
+    //         this.revertColor( this.indexOfAudio );
 
-            this.sequenceIndex++;
-            if (this.next && this.sequenceIndex < this.sequence.length){
-                this.audio.src = this.audioSrc[this.sequence[this.sequenceIndex]];
-                this.audio.play();
-            }
-            if (this.sequenceIndex >= this.sequence.length){
-                this.sequenceIndex = 0;
-                this.next = false;
-            }
-        });
-    }
+    //         this.sequenceIndex++;
+    //         if (this.next && this.sequenceIndex < this.sequence.length){
+    //             this.audio.src = this.audioSrc[this.sequence[this.sequenceIndex]];
+    //             this.audio.play();
+    //         }
+    //         if (this.sequenceIndex >= this.sequence.length){
+    //             this.sequenceIndex = 0;
+    //             this.next = false;
+    //         }
+    //     });
+    // }
 
     //sets next to true, sets the first audio source and then plays it
-    playSequence(){
-        console.log('setting next');
-        this.next = true;
-        this.sequenceIndex = 0;
-        console.log('setting source');
-        this.audioPlay(this.sequence[this.sequenceIndex]); 
-    }
+    // playSequence(){
+    //     console.log('setting next');
+    //     this.next = true;
+    //     this.sequenceIndex = 0;
+    //     console.log('setting source');
+    //     this.audioPlay(this.sequence[this.sequenceIndex]); 
+    // }
 
     // Take in user entered sequence and parse into list
     handleUserSequence(event){
@@ -80,12 +81,19 @@ export default class simon extends LightningElement {
 
     //Initialize Game
     startGame(){
+        
+        if (this.gameButton == "End Game" && this.noClick){
+            this.endGame(); 
+        }else{
         // ASK USER IF THEY WANT TO RESTART IF THEY ARE CURRENTLY IN GAME
-        this.gameStarted = true;
-        this.sequence = [];
-        this.currentIndex = 0;
-        this.gameButton = "End Game"; 
-        this.getNext();    
+            this.noClick = true; 
+            this.gameStarted = true;
+            this.sequence = [];
+            this.userInput=[]; 
+            this.currentIndex = 0;
+            this.gameButton = "End Game"; 
+            this.getNext();    
+        }      
     }
 
     //End game
@@ -102,11 +110,15 @@ export default class simon extends LightningElement {
     async getNext(){
         this.curSquare = Math.floor(Math.random() * 4); 
         this.sequence.push(this.curSquare);
+        this.noClick = false; 
 
-        for (let i = 0; i < this.sequence.length; i++){
-            await this.wait(1000);
-            this.audioPlay(this.sequence[i]);  
+        for (let i = 0; i < this.sequence.length; i++){            
+            try{
+                await this.wait(1000);
+                this.audioPlay(this.sequence[i]);  
+            }catch(e){}
         }
+        this.noClick = true;
     }
 
     //reverts to original colors
@@ -129,8 +141,11 @@ export default class simon extends LightningElement {
 
     audioPlay(id){
         let query = '[data-id='+ '"'+id+'"'+']';
-        this.template.querySelector(query).style="background-color:black";
-        let song = this.audioSrc[id];
+        
+        if (this.gameStarted){
+            this.template.querySelector(query).style="background-color:black";
+            var song = this.audioSrc[id];
+        }
 
         this.audio.src = song; 
         this.audio.play();
@@ -148,10 +163,5 @@ export default class simon extends LightningElement {
         }else if(JSON.stringify(this.userInput) != JSON.stringify(this.sequence) && this.userInput.length >= this.sequence.length){
             this.endGame(); 
         }
-    }
-
-    //flips the visibility of user input 
-    toggleCreate(){
-        this.template.querySelector('[data-id="toggle"]').style="visibility:visible";
     }
 }
